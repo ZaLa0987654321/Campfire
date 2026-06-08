@@ -1,0 +1,39 @@
+/* Полностью черный экран, белый моноширинный шрифт */
+body {
+    background-color: #000000;
+    color: #ffffff;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 16px;
+    line-height: 1.2;
+    padding: 20px;
+    margin: 0;
+    user-select: none;
+}
+
+/* Каждая строка — это отдельный независимый pre-блок */
+.terminal-line {
+    margin: 0;
+    font-family: inherit;
+    white-space: pre; /* Строго сохраняем все пробелы */
+    min-height: 1.2em; /* Чтобы пустые строки не схлопывались */
+}
+
+
+/* Текстовые кнопки как в Candy Box */
+button {
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    font-family: inherit;
+    font-size: 16px;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline;
+}
+
+/* Эффект наведения на текстовую кнопку */
+button:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
