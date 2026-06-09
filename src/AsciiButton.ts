@@ -1,4 +1,4 @@
-import { Game } from './main';
+import { game } from './main';
 
 export class AsciiButton {
     private text: string;
@@ -11,7 +11,7 @@ export class AsciiButton {
         this.onClick = onClick;
     }
 
-    public getHtml(game: Game): string {
+    public getHtml(): string {
         // Регистрируем колбэк по фиксированному ключу
         game.registerButtonCallback(this.key, this.onClick);
         

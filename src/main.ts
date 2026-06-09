@@ -1,25 +1,44 @@
 import { State } from './State';
 import { CampScreen } from './screens/CampScreen';
 import { AsciiAnimation } from './AsciiAnimation';
+import type { ForestEncounter } from './ForestEncounter';
+import type { ResourceEncounter } from './ResourceEncounter';
+
+export let game: Game;
+type EncounterConstructor = new () => ResourceEncounter;
 
 export class Game {
     private state: State;
     private terminalContainer: HTMLDivElement;
     private activeAnimations: AsciiAnimation[] = [];
     private buttonRegistry: Map<string, () => void> = new Map();
+    private forestEncountersRegistry: EncounterConstructor[] = [];
     
     // Храним массив HTML-элементов строк, которые сейчас на экране
     private domLines: HTMLPreElement[] = [];
 
     constructor() {
+        game = this;
         this.state = new State();
-        // Находим наш главный контейнер
         this.terminalContainer = document.getElementById('game-terminal') as HTMLDivElement;
-        this.state.currentScreen = new CampScreen(this.state, () => this.update(), this);
+        this.state.currentScreen = new CampScreen(this.state, () => this.update());
+
+        const modules = import.meta.glob("./forest/*/*.ts", { eager: true });
+        for (const path in modules) {
+            const module = modules[path] as any;
+            const exportedItem = Object.values(module as object)[0];
+            this.forestEncountersRegistry.push(exportedItem);
+        }
+
+        console.log(this.forestEncountersRegistry);
 
         this.initClickListener();
         this.initTimers();
         this.update();
+    }
+
+    public getRandomForestEncounter(): ForestEncounter {
+        return new this.forestEncountersRegistry[Math.floor(Math.random() * this.forestEncountersRegistry.length)]();
     }
 
     public registerButtonCallback(key: string, callback: () => void): void {
@@ -32,7 +51,7 @@ export class Game {
 
     private initClickListener(): void {
         // mousedown ловит нажатие мгновенно
-        this.terminalContainer.addEventListener('mouseup', (e) => {
+        this.terminalContainer.addEventListener('mousedown', (e) => {
             const target = e.target as HTMLElement;
             const actionId = target.getAttribute('data-action-id');
             

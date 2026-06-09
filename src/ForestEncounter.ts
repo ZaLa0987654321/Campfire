@@ -1,17 +1,34 @@
-import { Game } from './main';
+import type { AsciiAnimation } from './AsciiAnimation';
+import type { AsciiButton } from './AsciiButton';
+import { game } from './main';
 
 export abstract class ForestEncounter {
     public name: string;
-    protected rawArt: string;
+    protected art: AsciiAnimation;
+    protected buttons: AsciiButton[];
 
-    constructor(name: string, rawArt: string) {
+    constructor(name: string, art: AsciiAnimation, buttons: AsciiButton[]) {
         this.name = name;
-        this.rawArt = rawArt;
+        this.art = art;
+        game.addAnimation(this.art);
+        this.buttons = buttons;
     }
 
-    public getArtLines(): string[] {
-        return this.rawArt.replace(/\r/g, "").split("\n");
-    }
+    public render(): string {
+        const frame = this.art.getCurrentFrame();
+        let lines = frame.replace("\r", "").split("\n");
+        if (lines.length < 1 + this.buttons.length) {
+            for (let i = 0; i < lines.length - (1 + this.buttons.length); i++) {
+                lines.push("");
+            }
+        }
 
-    public abstract renderControls(game: Game, onUpdate: () => void): string[];
+        const maxLength = Math.max(...lines.map(s => s.length));
+
+        for (let b = 0; b < this.buttons.length; b++) {
+            lines[b+1] = lines[b+1].padEnd(maxLength+4, " ") + this.buttons[b].getHtml();
+        }
+
+        return lines.join("\n");
+    }
 }

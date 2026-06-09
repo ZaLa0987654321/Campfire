@@ -1,15 +1,12 @@
 import { State } from './State';
-import { Game } from './main';
 
 export abstract class Screen {
     protected state: State;
     protected onUpdate: () => void;
-    protected game: Game;
 
-    constructor(state: State, onUpdate: () => void, game: Game) {
+    constructor(state: State, onUpdate: () => void) {
         this.state = state;
         this.onUpdate = onUpdate;
-        this.game = game;
     }
 
     public abstract render(): string;

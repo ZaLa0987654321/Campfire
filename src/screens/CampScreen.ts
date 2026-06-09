@@ -3,20 +3,20 @@ import { State } from '../State';
 import { AsciiButton } from '../AsciiButton';
 import { ForestScreen } from './ForestScreen';
 import fireArt from '../textures/campfire.txt?raw';
-import type { Game } from '../main';
 import { AsciiAnimation } from '../AsciiAnimation';
+import { game } from '../main';
 
 export class CampScreen extends Screen {
     private timerId: any = null;
     private fireAnimation: AsciiAnimation;
 
-    constructor(state: State, onUpdate: () => void, game: Game) {
-        super(state, onUpdate, game);
+    constructor(state: State, onUpdate: () => void) {
+        super(state, onUpdate);
         this.startCampTimer();
 
         this.fireAnimation = new AsciiAnimation(fireArt);
 
-        this.game.addAnimation(this.fireAnimation);
+        game.addAnimation(this.fireAnimation);
     }
 
     private startCampTimer(): void {
@@ -44,15 +44,10 @@ export class CampScreen extends Screen {
 
         // === 1. ВЕРХНЯЯ ПАНЕЛЬ ===
         out += `Древесина: ${this.state.wood}\n`;
-        
+         
         // Если строка костра была открыта хоть раз — она не исчезает
         if (this.state.unlockedFireRow) {
-            out += `Костер:    ${this.state.hasFire ? this.state.fireTicks + '%' : 'не зажжен'}\n`;
-        }
-        
-        // Показываем радиус, только если костер горит прямо сейчас
-        if (this.state.hasFire) {
-            out += `Радиус безопасности: ${this.state.maxRadius} шагов\n`;
+            out += `Костер:    ${this.state.hasFire ? this.state.getFirePercent() + '%' : 'не зажжен'}\n`;
         }
         
         out += "==================================================\n\n";
@@ -74,7 +69,7 @@ export class CampScreen extends Screen {
             this.state.wood++;
             this.onUpdate();
         });
-        out += "  " + gatherBtn.getHtml(this.game) + "\n";
+        out += "  " + gatherBtn.getHtml() + "\n";
 
         // Кнопка розжига костра
         if (this.state.unlockedLightBtn) {
@@ -83,10 +78,10 @@ export class CampScreen extends Screen {
                     const lightBtn = new AsciiButton("Разжечь костер (30 дерева)", "light", () => {
                         this.state.wood -= 30;
                         this.state.hasFire = true;
-                        this.state.fireTicks = 100;
+                        this.state.fireTicks = this.state.maxFireTicks;
                         this.onUpdate();
                     });
-                    out += "  " + lightBtn.getHtml(this.game) + "\n";
+                    out += "  " + lightBtn.getHtml() + "\n";
                 } else {
                     // Если дерева не хватает, кнопка не исчезает, а блокируется текстиком
                     out += "  [ Разжечь костер (Нужно 30 дерева) ]\n";
@@ -99,11 +94,11 @@ export class CampScreen extends Screen {
             if (this.state.wood > 0) {
                 const fuelBtn = new AsciiButton("Подкинуть 1 дерево", "fuel", () => {
                     this.state.wood--;
-                    this.state.fireTicks = Math.min(this.state.fireTicks + 2, 100);
+                    this.state.fireTicks = Math.min(this.state.fireTicks + 25, this.state.maxFireTicks);
                     this.onUpdate();
                     this.fireAnimation.playOnce("flash");
                 });
-                out += "  " + fuelBtn.getHtml(this.game) + "\n";
+                out += "  " + fuelBtn.getHtml() + "\n";
             } else {
                 // Если костер горит, но веток нет — кнопка заблокирована
                 out += "  [ Нет дерева ]\n";
@@ -116,9 +111,9 @@ export class CampScreen extends Screen {
                 const goForestBtn = new AsciiButton("Идти в глубь леса", "to_forest", () => {
                     this.stopCampTimer();
                     this.state.forestStep = 0;
-                    this.game.changeScreen(new ForestScreen(this.state, this.onUpdate, this.game));
+                    game.changeScreen(new ForestScreen(this.state, this.onUpdate));
                 });
-                out += "\n  " + goForestBtn.getHtml(this.game) + "\n";
+                out += "\n  " + goForestBtn.getHtml() + "\n";
             } else {
                 // Если костер потух, тропинка в лес видна, но пойти нельзя из-за холода
                 out += "\n  [ Идти в глубь леса (Слишком холодно) ]\n";

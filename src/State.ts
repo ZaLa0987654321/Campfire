@@ -3,10 +3,10 @@ import { Screen } from './Screen';
 export class State {
     public wood: number = 0;
     public hasFire: boolean = false;
-    public fireTicks: number = 100;
+    public fireTicks: number = 1000;
+    public maxFireTicks: number = 1000;
     
     public forestStep: number = 0;
-    public maxRadius: number = 5;
     public currentScreen?: Screen; 
 
     // Флаги постоянного открытия интерфейса
@@ -14,13 +14,8 @@ export class State {
     public unlockedLightBtn: boolean = false;  
     public unlockedForestBtn: boolean = false; 
 
-    // 1. Метод отвечает СТРОГО за расчет радиуса тепла
-    public updateMaxRadius(): void {
-        if (!this.hasFire) {
-            this.maxRadius = 3;
-        } else {
-            this.maxRadius = Math.max(3, Math.floor(20 * (this.fireTicks / 100)));
-        }
+    public getFirePercent() {
+        return Math.round(this.fireTicks/this.maxFireTicks*1000)/10;
     }
 
     // 2. Метод отвечает СТРОГО за проверку новых открытий
@@ -38,7 +33,6 @@ export class State {
 
     // 3. Главный метод обновления данных, который вызывается при любом изменении игры
     public updateAll(): void {
-        this.updateMaxRadius();
         this.checkUnlocks();
     }
 }
